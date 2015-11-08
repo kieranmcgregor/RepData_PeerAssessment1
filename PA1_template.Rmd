@@ -8,11 +8,43 @@ output:
 
 ## Loading and preprocessing the data
 
+1. Load the data (i.e. read.csv())
+```{r}
+if(!exists("./activity.zip")){
+    fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+    download.file(fileUrl, destfile = "activity.zip", method = "curl")
+}
 
+activityUnzip <- unzip(("activity.zip"), files = "activity.csv")
+
+activityData <- read.csv(activityUnzip, sep = ",", header = TRUE)
+```
+
+2. Process/transform the data (if necessary) into a format suitable for your analysis
 
 ## What is mean total number of steps taken per day?
 
+1. Calculate the total number of steps taken per day
 
+```{r}
+activityDataDailySteps <- aggregate(cbind(steps) ~ date, data = activityData, FUN = sum)
+```
+
+2. Make a histogram of the total number of steps taken each day
+
+```{r}
+barplot(activityDataDailySteps$steps,
+        names.arg = activityDataDailySteps$date,
+        xlab = "Date",
+        ylab = "Steps",
+        main = "Total Number of Steps Taken Each Day")
+```
+
+3. Calculate and report the mean and median of the total number of steps taken per day
+
+```{r}
+activityDataDailySteps
+```
 
 ## What is the average daily activity pattern?
 
