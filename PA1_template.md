@@ -23,6 +23,8 @@ library(dplyr)
 ```
 
 ```r
+library(lattice)
+
 if(!exists("./activity.zip")){
     fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
     download.file(fileUrl, destfile = "activity.zip", method = "curl")
@@ -261,22 +263,34 @@ activityDataNoNaMedian <- activityDataNoNa%>%
 
 activityDataNoNaSteps <- cbind(activityDataNoNaSteps,
                                 median = activityDataNoNaMedian$median)
-
-sum(activityDataNoNaSteps$steps >= 0)
 ```
 
-```
-## [1] 61
-```
-
-```r
-sum(activityDataNoNaSteps$steps > 9202)
-```
-
-```
-## [1] 38
-```
-
-It can be seen by replacing the NA values with the daily interval mean values that on any given day where values were missing the median values are equal to 25 steps. Also, this increases the estimates of the total daily number of steps.
+It can be seen by replacing the NA values with the daily interval mean values that on any given day where values were missing the median values are equal to 25 steps as opposed to 0. Also, having 8 days that were once never calculated for now have a value of 9202 steps lends to increasing the estimates of the total daily number of steps.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+
+```r
+activityData <- cbind(activityData,
+                      weekday_end = ifelse(weekdays(activityData$date) == "Saturday" | weekdays(activityData$date) == "Sunday", "weekend", "weekday"))
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+
+```r
+activityDataMean <- activityData%>%
+    group_by(interval, weekday_end)%>%
+    summarise(mean = round(mean(steps, na.rm = TRUE)),
+              digits = 0)
+
+xyplot(activityDataMean$mean ~ activityDataMean$interval | activityDataMean$weekday_end,
+       layout = c(1, 2),
+       type = "l",
+       xlab = "Interval",
+       ylab = "Number of Steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
